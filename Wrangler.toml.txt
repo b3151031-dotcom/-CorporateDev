@@ -1,0 +1,7 @@
+name = "corporatedev"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+[[kv_namespaces]]
+binding = "EVENTS"
+id = "REPLACE_AFTER_KV_CREATE"

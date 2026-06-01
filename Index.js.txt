@@ -1,0 +1,67 @@
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/") {
+      return Response.json({
+        service: "CorporateDev X Activity Webhook",
+        status: "online"
+      });
+    }
+
+    if (url.pathname !== "/webhooks/x") {
+      return new Response("Not Found", {
+        status: 404
+      });
+    }
+
+    if (request.method !== "POST") {
+      return new Response("Method Not Allowed", {
+        status: 405
+      });
+    }
+
+    const secret = request.headers.get(
+      "x-webhook-secret"
+    );
+
+    if (secret !== env.WEBHOOK_SECRET) {
+      return new Response(
+        "Unauthorized",
+        { status: 401 }
+      );
+    }
+
+    try {
+      const event = await request.json();
+
+      console.log(
+        JSON.stringify(event, null, 2)
+      );
+
+      const eventType =
+        event?.data?.event_type;
+
+      switch (eventType) {
+        case "profile.update.bio":
+          await env.EVENTS.put(
+            crypto.randomUUID(),
+            JSON.stringify(event)
+          );
+          break;
+
+        default:
+          console.log(
+            `Unhandled event: ${eventType}`
+          );
+      }
+
+      return new Response("OK");
+    } catch (error) {
+      return new Response(
+        error.message,
+        { status: 400 }
+      );
+    }
+  }
+};
